@@ -1,5 +1,5 @@
-const express = require("express")
-const Profile = require("../DB Models/profile-DB")
+import express from 'express'
+import Profile from "../DB Models/profile-DB.js"
 const router = express.Router()
 
 // POST new profile(Create account)
@@ -40,8 +40,8 @@ router.get("/:id", async (req, res) => {
 })
 
 // GET all profile by registration Number
-router.get("/", async (req,res) => {
+// router.get("/", async (req,res) => {
     
-})
+// })
 
-module.exports = router;
+export default router;

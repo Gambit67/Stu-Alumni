@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+import mongoose  from 'mongoose'
 
 const authSchema = new mongoose.Schema ({
     email: {
@@ -13,4 +13,4 @@ const authSchema = new mongoose.Schema ({
 })
 
 const Auth = mongoose.model("Auth",authSchema)
-module.exports = Auth;
+export default Auth

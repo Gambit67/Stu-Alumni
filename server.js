@@ -1,25 +1,24 @@
-const env = require("dotenv").config()
-const express = require("express")
+import env from "dotenv"
+env.config()
+import express from 'express'
 const app = express()
-const mongoose = require("mongoose")
+import mongoose from 'mongoose'
+
 const port = 3000
-const Profile = require("./DB Models/profile-DB")
-const profileRoutes = require("./routes/profiles")
-const Post = require("./DB Models/post-DB")
-const postRoutes = require("./routes/posts")
-const Auth = require("./DB Models/auth-DB")
-const authRoutes = require("./routes/auth")
-app.use(express.json()); // Middlewae for parsing json
+import profileRoutes from "./routes/profiles.js"
+import postRoutes from "./routes/posts.js"
+import authRoutes from "./routes/auth.js"
+app.use(express.json()); // Middleware for parsing json
 app.use("/profiles", profileRoutes);
 app.use("/posts", postRoutes)
-app.use("auth", authRoutes)
+app.use("/auth", authRoutes)
 
 
 // connectServer()
 
 async function connectServer() {
     try {
-        await mongoose.connect(process.env.MONGO_URL)
+        await mongoose.connect(process.env.MONGO_URL) //Connect to mongoDB
         console.log("Connected to Mongo DB")
 
         app.listen(port, () => {

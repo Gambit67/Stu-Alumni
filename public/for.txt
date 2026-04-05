@@ -1,0 +1,3 @@
+For
+Static Html, css, images
+Compiled Js files

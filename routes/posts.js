@@ -1,5 +1,5 @@
-const Post = require("../DB Models/post-DB")
-const express = require("express");
+import Post from "../DB Models/post-DB.js"
+import express from 'express'
 const router = express.Router()
 
 //POST a post (Make post)
@@ -24,7 +24,7 @@ router.get("/", async (req,res) => {
     
 })
 
-//DELETE post by id
+//DELETE post by id (DYnamic id should be the last route)
 router.delete("/:id", async (req,res)=> {
     try {
         const deletedPost = await Post.findByIdAndDelete(req.params.id);
@@ -40,4 +40,4 @@ router.delete("/:id", async (req,res)=> {
     
 });
 
-module.exports = router;
+export default router;

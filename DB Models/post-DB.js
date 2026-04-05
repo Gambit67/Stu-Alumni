@@ -1,11 +1,17 @@
-const mongoose = require("mongoose")
+import mongoose from 'mongoose'
 
 
-// const commentSchema = new mongoose.Schema({})
+const commentSchema = new mongoose.Schema({
+
+})
+
+const likeSchema = new mongoose.Schema({
+    
+})
 
 const postSchema = new mongoose.Schema({
     author: {
-        type:String,//Will be an ID pointing to the profile
+        type:String,//ID pointing to the profile
         required: true
     },
     content:{
@@ -22,4 +28,4 @@ const postSchema = new mongoose.Schema({
 })
 
 const Post = mongoose.model("Post", postSchema)
-module.exports = Post
+export default Post
