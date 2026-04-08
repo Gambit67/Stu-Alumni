@@ -23,8 +23,9 @@ VALUES(
     2023264156
 )
 
-SELECT email, id ,regNumber FROM Users;
+DELETE FROM Users
+        WHERE id = 25;
 
 
 
-SELECT * FROM Users;
+SELECT * FROM authUsers;

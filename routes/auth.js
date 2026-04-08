@@ -21,11 +21,11 @@ router.post("/login", async (req,res)=> {
         const {email,password} = req.body;
         const auth = await Auth.findOne({email});
         if (!auth) {
-            return res.status(401).json({message: "Invalid Email or Password"});
+            return res.status(401).json({message: "Invalid credentials"});
         }
         const isMatch = await bcrypt.compare(password,auth.password);
         if (!isMatch) {
-            return res.status(401).json({message: "Wrong Password"});
+            return res.status(401).json({message: "Invalid credentials"});
         }
         res.status(200).json({message: "Login successful"});
     } catch (error) {
