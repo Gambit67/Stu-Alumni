@@ -1,13 +1,13 @@
-import Post from "../DB Models/post-DB.js"
-import express from 'express'
+const Post = require("../DB Models/post-DB")
+const express = require("express");
 const router = express.Router()
 
 //POST a post (Make post)
-router.post("/",async (req,res)=> {
+route.post("/",async (req,res)=> {
     try {
         const newPost = new Post(req.body);
         const savedPost = await newPost.save();
-        res.status(201).json(savedPost);
+        res.status(201).json(savedPost);router
     } catch (error) {
         res.status(400).json({message: error.message});
     }  
@@ -40,4 +40,4 @@ router.delete("/:id", async (req,res)=> {
     
 });
 
-export default router;
+module.exports = router;
