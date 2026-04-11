@@ -1,31 +1,36 @@
--- @block
-CREATE TABLE Users(
-    id INT PRIMARY KEY AUTO_INCREMENT, 
-    name VARCHAR(255),
+-- Auth table (credentials only (email & password))
+CREATE TABLE authUsers (
+    id INT(11) AUTO_INCREMENT PRIMARY KEY,
     email VARCHAR(255) NOT NULL UNIQUE,
-    bio TEXT,
-    regNumber INT UNIQUE
+    password_hash VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
--- @block
-INSERT INTO Users (name,email, regNumber )
-VALUES(
-    'Victor Obiano',
-    'obianovictor11@gmail.com',
-    2023364000
-)
+
+--User profile table
+CREATE TABLE Users (
+    id INT(11) AUTO_INCREMENT PRIMARY KEY,
+    auth_user_id INT(11) NOT NULL UNIQUE,
+    name VARCHAR(255),
+    bio TEXT,
+    regNumber BIGINT(20) UNIQUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (auth_user_id)
+        REFERENCES authUsers(id) ON DELETE CASCADE
+);
+
+-- Trigger to create user row on sign-up
+
+CREATE TRIGGER after_auth_insert
+AFTER INSERT ON authUsers
+FOR EACH ROW
+ INSERT INTO Users (auth_user_id)
+ VALUES (NEW.id)
+;
+
+SELECT * FROM authUsers WHERE id = 2
+
+SELECT * FROM Users;
 
 
--- @block
-INSERT INTO Users (name,email, regNumber )
-VALUES(
-    'miracle',
-    'obiekwem@gmail.com',
-    2023264156
-)
-
-DELETE FROM Users
-        WHERE id = 25;
-
-
-
-SELECT * FROM authUsers;
+SELECT name,COUNT(auth_user_id) FROM Users
+GROUP BY name;

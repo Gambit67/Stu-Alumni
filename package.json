@@ -24,5 +24,16 @@
   },
   "devDependencies": {
     "nodemon": "^3.1.11"
-  }
+  },
+  "directories": {
+    "test": "tests"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Gambit67/Stu-Alumni.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Gambit67/Stu-Alumni/issues"
+  },
+  "homepage": "https://github.com/Gambit67/Stu-Alumni#readme"
 }
