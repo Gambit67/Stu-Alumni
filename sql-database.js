@@ -19,12 +19,12 @@ async function getUsers() {
 
 async function getUser(id) {                  // This not working yet
     const [result] = await pool.query(`
-        SELECT *                            
-        FROM Users                                
+        SELECT * FROM Users                           
         WHERE id = ?
     `, [id])
     return result[0]
 }
+                                        
 
 // Delete by id  (Not working)
 async function deleteUser(id) {
