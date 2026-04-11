@@ -55,7 +55,7 @@ app.post('/sql/login', async (req, res) => {
 app.delete('/sql', async (req, res) => {
     try {
         const { id } = req.body;
-        if (!id) {// updateProfile(9 ,"postmanbot", "Testing", 2023999999)
+        if (!id) {
             return res.status(400).json({ message: "Missing 'id' in request body." });
         }
         const result = await deleteUser(id);
@@ -77,8 +77,15 @@ app.patch("/sql/update/:id", async (req, res) => {
     } catch (error) {
         return res.status(500).json({message: error.message})
     }
-   
 })
+
+//GET user by id (from url)
+app.get ("/sql/:uid",async  (req,res)=>{
+    const id = req.params.uid
+    const profile = await getUser(id)
+    return res.status(200).json({profile})
+})
+   
 
 // connectServer()
 async function connectServer() {
