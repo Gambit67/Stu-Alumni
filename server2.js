@@ -3,7 +3,7 @@ import bcrypt from 'bcrypt'
 const app = express()
 const port = 8080
 app.use(express.json()); // Middleware for parsing json
-import { pool, getUsers, getUser, signUp, deleteUser, logIn, updateProfile } from './sql-database.js'
+import { pool, getUsers, getUser, signUp, deleteUser, logIn, updateProfile, searchUser } from './sql-database.js'
 
 // GET all users (sql)
 app.get("/sql", async (req, res) => {
@@ -12,6 +12,17 @@ app.get("/sql", async (req, res) => {
         return res.status(200).send(allUsers);
     } catch (error) {
         return res.status(400).send(error)
+    }
+})
+
+//Search for User
+app.get('/sql/search', async (req, res) => {
+    try {
+        const { input } = req.query // Use params from url
+        const result = await searchUser(input)
+        return res.status(200).json({ found: result})
+    } catch (error){
+        return res.status(400).json({ message: error.message })
     }
 })
 
@@ -34,7 +45,6 @@ app.post("/sql", async (req, res) => {
 app.post('/sql/login', async (req, res) => {
     try {
         const { email, password } = req.body;
-
         if (!email || !password) {
             return res.status(401).json({ message: "Email and password required" })
         }
@@ -47,6 +57,7 @@ app.post('/sql/login', async (req, res) => {
         return res.status(500).json({ message: error.message })
     }
 })
+
 
 
 
@@ -75,17 +86,17 @@ app.patch("/sql/update/:id", async (req, res) => {
         await updateProfile(id, name, bio, regNumber)
         return res.status(200).json({ message: "Profile Update successful" })
     } catch (error) {
-        return res.status(500).json({message: error.message})
+        return res.status(500).json({ message: error.message })
     }
 })
 
 //GET user by id (from url)
-app.get ("/sql/:uid",async  (req,res)=>{
+app.get("/sql/:uid", async (req, res) => {
     const id = req.params.uid
     const profile = await getUser(id)
-    return res.status(200).json({profile})
+    return res.status(200).json({ profile })
 })
-   
+
 
 // connectServer()
 async function connectServer() {

@@ -24,7 +24,7 @@ async function getUser(id) {                  // This not working yet
     `, [id])
     return result[0]
 }
-                                        
+
 
 // Delete by id  (Not working)
 async function deleteUser(id) {
@@ -88,25 +88,43 @@ async function logIn(email, password) {
 }
 
 // Update Profile  (PUT request)
-async function updateProfile(id ,name, bio, regNumber) {  
+async function updateProfile(id, name, bio, regNumber) {
     const [target] = await pool.query(`
         SELECT id FROM authUsers WHERE id = ?`,
-    [id])
+        [id])
     // console.log( "hi",target[0])
     if (target.length === 0) {
-        throw  new Error ("User not found");
+        throw new Error("User not found");
     }
     const authUserId = target[0].id;
-    
+
     const [update] = await pool.query(`
         UPDATE Users SET name=?, bio=?, regNumber=? 
         WHERE auth_user_id=?
-    `, [name, bio, regNumber,authUserId])
+    `, [name, bio, regNumber, authUserId])
     // console.log(update)
     return update
+}
+//Search functionality (test)
+async function searchUser(input) {
+    const [user] = await pool.query(`
+        SELECT * FROM Users 
+        WHERE name LIKE ?
+    `, [`%${input}%`]) //returns all column where input value matches name
+
+    if (user.length === 0) return[]
+    // console.log(user) 
+    return user
 }
 
 
 
 
-export { pool, getUsers, getUser, signUp, deleteUser, logIn, updateProfile}
+
+
+
+export {
+    pool, getUsers, getUser, signUp,
+    deleteUser, logIn, updateProfile, searchUser
+}
+
