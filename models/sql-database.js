@@ -17,10 +17,10 @@ async function getUsers() {
 }
 
 
-async function getUser(id) {                  // This not working yet
+async function getUser(id) {
     const [result] = await pool.query(`
-        SELECT * FROM Users                           
-        WHERE id = ?
+        SELECT * FROM Users
+        WHERE auth_user_id = ?
     `, [id])
     return result[0]
 }
@@ -40,7 +40,7 @@ async function deleteUser(id) {
     const [result] = await pool.query(`
         DELETE FROM Users WHERE id = ?
     `, [id]);
-    console.log("Deleted user:", deletedUser);
+    // console.log("Deleted user:", deletedUser);
     return deletedUser; // Return deleted profile as JSON
 }
 
@@ -50,7 +50,7 @@ async function signUp(email, password_hash) {
         INSERT INTO authUsers (email,password_hash)
         VALUES (?,?)
     `, [email, password_hash]);
-    // console.log("Signup succesful")
+     console.log("Signup succesful")
     return newSignUp
 }
 
@@ -58,34 +58,21 @@ async function signUp(email, password_hash) {
 
 //Logins email & password
 async function logIn(email, password) {
-    const dbEmail = await pool.query(`
-        SELECT email FROM authUsers 
+    const [rows] = await pool.query(`
+        SELECT password_hash,id,email FROM authUsers
         WHERE email = ?
-    `, [email])
-    if (!dbEmail || dbEmail[0].length === 0) {
-        // console.log("Users doesnt exist")
+    `, [email]);
+    if (rows.length === 0) {
         return null
     }
-
-    const dbPassword = await pool.query(`
-        SELECT password_hash FROM authUsers
-        WHERE email = ?
-    `, [email])
-    if (!dbPassword || dbPassword.length === 0) {
-        // console.log("Wrong Password")
-        return null
-    }
-
-    const storedHash = dbPassword[0][0].password_hash
-    // console.log(storedHash,dbPassword)
-
-    const isMatch = await bcrypt.compare(password, storedHash)
+    const user = rows[0]
+    const isMatch = await bcrypt.compare(password, user.password_hash)
     if (!isMatch) {
-        // console.log("Wrong Password")
         return null
     }
-    return dbPassword[0][0]
+    return user;
 }
+
 
 // Update Profile  (PUT request)
 async function updateProfile(id, name, bio, regNumber) {
@@ -99,21 +86,21 @@ async function updateProfile(id, name, bio, regNumber) {
     const authUserId = target[0].id;
 
     const [update] = await pool.query(`
-        UPDATE Users SET name=?, bio=?, regNumber=? 
+        UPDATE Users SET name=?, bio=?, regNumber=?
         WHERE auth_user_id=?
     `, [name, bio, regNumber, authUserId])
-    // console.log(update)
+    console.log(update)
     return update
 }
-//Search functionality (test)
-async function searchUser(input) {
+//Search profile functionality by name (test)
+async function searchUser(name) {
     const [user] = await pool.query(`
-        SELECT * FROM Users 
+        SELECT * FROM Users
         WHERE name LIKE ?
-    `, [`%${input}%`]) //returns all column where input value matches name
+    `, [`%${name}%`]) //returns all column where input value matches name
 
     if (user.length === 0) return[]
-    // console.log(user) 
+    // console.log(user)
     return user
 }
 
@@ -125,6 +112,6 @@ async function searchUser(input) {
 
 export {
     pool, getUsers, getUser, signUp,
-    deleteUser, logIn, updateProfile, searchUser
+    deleteUser, logIn, updateProfile,
+    searchUser
 }
-

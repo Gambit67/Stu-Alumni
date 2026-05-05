@@ -4,8 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon server.js",
-    "start2": "nodemon server2.js",
+    "dev": "nodemon server.js",
+    "dev2": "nodemon server2.js",
     "data": "node sql-database.js"
   },
   "keywords": [],
@@ -13,17 +13,20 @@
   "license": "ISC",
   "type": "module",
   "dependencies": {
+    "@prisma/client": "^7.8.0",
     "bcrypt": "^6.0.0",
     "dotenv": "^17.3.1",
     "ejs": "^4.0.1",
     "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.3",
     "mariadb": "^3.5.2",
     "mongodb": "^7.1.1",
     "mongoose": "^9.3.3",
     "mysql2": "^3.20.0"
   },
   "devDependencies": {
-    "nodemon": "^3.1.11"
+    "nodemon": "^3.1.11",
+    "prisma": "^7.8.0"
   },
   "directories": {
     "test": "tests"
