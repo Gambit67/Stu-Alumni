@@ -6,6 +6,7 @@ import {
   deleteUserProfile,
   updateProfileData,
 } from "../controllers/profile.controller.js";
+import { authenticateToken } from "../middlewares/auth.middleware.js";
 
 const router = express.Router();
 
@@ -19,7 +20,7 @@ router.get("/search", getUserProfile);
 router.delete("/", deleteUserProfile);
 
 // Update (PUT) profile via dynamic route
-router.put("/update/:id", updateProfileData);
+router.put("/update", authenticateToken, updateProfileData);
 
 // GET user by id
 router.get("/:uid", getSingleProfile);

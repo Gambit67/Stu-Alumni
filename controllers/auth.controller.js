@@ -1,24 +1,6 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import { signUp, logIn } from "../models/sql-database.js";
-
-
-// Authenticate JWT
-export function authenticateToken(req, res, next) {
-  const authHeader = req.headers["authorization"];
-  const token = authHeader?.split(" ")[1];
-  console.log(authHeader, req.headers)
-  if (!token) return res.status(401).json({ message: "No token" });
-  try{
-    const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET)
-    req.user = decoded;
-    next();
-  } catch (err) {
-    return res.status(403).json({message:err.message})
-  }
-}
-
-
+import { signUp, logIn, saveRefreshToken, findUserByRefreshToken } from "../models/sql-database.js";
 
 
 async function authSignup(req, res) {
@@ -48,22 +30,67 @@ async function authLogin(req, res) {
     if (!user) {
       return res.status(401).json({ message: "Invalid email or password" }); //Checks database for user
     }
-    //Implement Jwt using the user object
+    //Implement Jwt using the user (safe) objects
     const accessToken = jwt.sign({ id: user.id, email: user.email },
-      process.env.ACCESS_TOKEN_SECRET, { expiresIn: '0.25h' }
-    ); // Expires in (use only numbers for seconds(for testing))
+      process.env.ACCESS_TOKEN_SECRET, { expiresIn: "15m" }
+    );
+
+    const refreshToken = jwt.sign({ id: user.id, email: user.email },
+      process.env.REFRESH_TOKEN_SECRET, { expiresIn: "7d" }
+    );
+
+    // Save refresh token to database
+    await saveRefreshToken(user.id, refreshToken);
+
     return res.status(200).json({
-      message: "Login successful", //Returns jwt to the client
-      accessToken: accessToken,
-      // email:user.email,
-      // id:user.id
+      message: "Login successful",
+      accessToken,
+      refreshToken
     });
   } catch (error) {
     return res.status(500).json({ message: error.message }); //General error
   }
 }
 
+async function tokenRefresh(req, res) {
+  const { refreshToken } = req.body;
+  if (!refreshToken) return res.status(401).json({ message: "Refresh token required" });
+
+  try {
+    // 1. Check if token exists in DB
+    const user = await findUserByRefreshToken(refreshToken);
+    if (!user) return res.status(403).json({ message: "Invalid refresh token" });
+
+    // 2. Verify JWT
+    jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, (err, decoded) => {
+      if (err) return res.status(403).json({ message: "Token expired or invalid" });
+
+      // 3. Issue new Access Token
+      const accessToken = jwt.sign(
+        { id: decoded.id, email: decoded.email },
+        process.env.ACCESS_TOKEN_SECRET,
+        { expiresIn: "15m" }
+      );
+
+      res.json({ accessToken });
+    });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+}
+
+async function authLogout(req, res) {
+  const { refreshToken } = req.body;
+  try {
+    const user = await findUserByRefreshToken(refreshToken);
+    if (user) {
+      await saveRefreshToken(user.id, null); // Clear token from DB
+    }
+    res.status(204).send();
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+}
 
 
-
-export { authLogin, authSignup };
+export { authLogin, authSignup, tokenRefresh, authLogout };

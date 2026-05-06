@@ -16,7 +16,6 @@ async function getUsers() {
     return result
 }
 
-
 async function getUser(id) {
     const [result] = await pool.query(`
         SELECT * FROM Users
@@ -25,23 +24,19 @@ async function getUser(id) {
     return result[0]
 }
 
-
-// Delete by id  (Not working)
+// Delete by id
 async function deleteUser(id) {
-    // First, fetch the user to return after deletion
     const [users] = await pool.query(`
         SELECT * FROM Users WHERE id = ?
     `, [id]);
     const deletedUser = users[0];
     if (!deletedUser) {
-        return null; // No user to delete
+        return null;
     }
-    // Then, delete the user
-    const [result] = await pool.query(`
+    await pool.query(`
         DELETE FROM Users WHERE id = ?
     `, [id]);
-    // console.log("Deleted user:", deletedUser);
-    return deletedUser; // Return deleted profile as JSON
+    return deletedUser;
 }
 
 //Signups with email & password
@@ -53,8 +48,6 @@ async function signUp(email, password_hash) {
      console.log("Signup succesful")
     return newSignUp
 }
-
-
 
 //Logins email & password
 async function logIn(email, password) {
@@ -73,45 +66,52 @@ async function logIn(email, password) {
     return user;
 }
 
-
-// Update Profile  (PUT request)
-async function updateProfile(id, name, bio, regNumber) {
-    const [target] = await pool.query(`
-        SELECT id FROM authUsers WHERE id = ?`,
-        [id])
-    // console.log( "hi",target[0])
-    if (target.length === 0) {
-        throw new Error("User not found");
-    }
-    const authUserId = target[0].id;
-
-    const [update] = await pool.query(`
-        UPDATE Users SET name=?, bio=?, regNumber=?
-        WHERE auth_user_id=?
-    `, [name, bio, regNumber, authUserId])
-    console.log(update)
-    return update
+// Refresh Token Helpers
+async function saveRefreshToken(id, token) {
+    await pool.query(`
+        UPDATE authUsers SET refresh_token = ?
+        WHERE id = ?
+    `, [token, id]);
 }
-//Search profile functionality by name (test)
+
+async function findUserByRefreshToken(token) {
+    const [rows] = await pool.query(`
+        SELECT id, email FROM authUsers
+        WHERE refresh_token = ?
+    `, [token]);
+    return rows[0];
+}
+
+// Update Profile
+async function updateProfile(id, name, bio, regNumber) {
+    // Use IFNULL to only update fields that are provided (not null)
+    const [result] = await pool.query(`
+        UPDATE Users 
+        SET name = IFNULL(?, name), 
+            bio = IFNULL(?, bio), 
+            regNumber = IFNULL(?, regNumber)
+        WHERE auth_user_id = ?
+    `, [name || null, bio || null, regNumber || null, id]);
+
+    if (result.affectedRows === 0) {
+        throw new Error("Profile not found"); // Check if there was any change in database
+    }
+    return result;
+}
+
+//Search profile functionality
 async function searchUser(name) {
     const [user] = await pool.query(`
         SELECT * FROM Users
         WHERE name LIKE ?
-    `, [`%${name}%`]) //returns all column where input value matches name
+    `, [`%${name}%`])
 
     if (user.length === 0) return[]
-    // console.log(user)
     return user
 }
-
-
-
-
-
-
 
 export {
     pool, getUsers, getUser, signUp,
     deleteUser, logIn, updateProfile,
-    searchUser
+    searchUser, saveRefreshToken, findUserByRefreshToken
 }

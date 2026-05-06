@@ -62,9 +62,11 @@ async function deleteUserProfile(req, res) {
 // UPDATE (PATCH/PUT) profile
 async function updateProfileData(req, res) {
   try {
-    const id = req.params.id;
+    const id = req.user.id;
     const { name, bio, regNumber } = req.body;
     await updateProfile(id, name, bio, regNumber);
+    
+    console.log(name,bio,regNumber)
     return res.status(200).json({ message: "Profile Update successful" });
   } catch (error) {
     return res.status(500).json({ message: error.message });
